@@ -27,7 +27,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build docker image
-        run: docker build -t docker.io/${{ github.repository }}:${{ env.IMG_VERSION }} .
+        run: docker build -t docker.io/${{ github.repository }}:${{ env.IMG_VERSION }} . -f Dockerfile
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.28.0
@@ -38,9 +38,18 @@ jobs:
           TRIVY_DB_REPOSITORY: 'public.ecr.aws/aquasecurity/trivy-db,aquasec/trivy-db,ghcr.io/aquasecurity/trivy-db'
 
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64, linux/arm64
           push: true
           tags: '${{ github.repository }}:${{ env.IMG_VERSION }}'
+
+      - name: Build and push image with root
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: DockerfileRoot
+          platform: linux/amd64, linux/arm64
+          push: true
+          tags: '${{ github.repository }}:${{ env.IMG_VERSION }}-root'
