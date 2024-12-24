@@ -1,4 +1,9 @@
-FROM alpine:3.20.2
+FROM alpine:3.21.0
+
+LABEL author="Taruf Khan <https://github.com/devbyteops>"
+LABEL description="Alpine based dockerfile for aws cli"
+MAINTAINER "Taruf Khan <tarufkhan@gmail.com>"
+
 RUN apk add --no-cache python3 py3-pip aws-cli bash \
     && rm -rf /var/cache/apk/*
 

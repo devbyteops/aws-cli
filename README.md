@@ -1,4 +1,5 @@
 - Light weight alpine based docker image with latest aws cli package.
 - Non root user, default user is `appuser`.
+- Using Trivy for scanning the image before pushing it to dockerhub.
 - Image available on dockerhub, follow :point_right: [`devbyteops/aws-cli`](https://hub.docker.com/r/devbyteops/aws-cli).
-- Support two architectures `amd64` & `arm64`.
+- Supports arch `amd64` & `arm64`.

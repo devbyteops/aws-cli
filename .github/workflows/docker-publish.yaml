@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IMG_NAME: ${{ github.repository }}
+      IMG_VERSION: 0.0.3
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -24,27 +25,22 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      
-      - name: Docker meta
-        id: metadata
-        uses: docker/metadata-action@v5
+
+      - name: Build docker image
+        run: docker build -t docker.io/${{ github.repository }}:${{ env.IMG_VERSION }} .
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
         with:
-          images: ${{ env.IMG_NAME }}
-          tags: |
-            # type=sha
-            type=schedule
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
+          image-ref: 'docker.io/${{ github.repository }}:${{ env.IMG_VERSION }}'
+          format: 'table'
+        env:
+          TRIVY_DB_REPOSITORY: 'public.ecr.aws/aquasecurity/trivy-db,aquasec/trivy-db,ghcr.io/aquasecurity/trivy-db'
 
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
           platforms: linux/amd64, linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
-          # tags: ${{ steps.metadata.outputs.tags }}
-          tags: devbyteops/aws-cli:0.0.2
-          labels: ${{ steps.metadata.outputs.labels }}
+          push: true
+          tags: '${{ github.repository }}:${{ env.IMG_VERSION }}'
